@@ -1,5 +1,3 @@
-/* play.ts */
-
 /* eslint-disable no-console */
 import type { SpawnOptions } from 'node:child_process'
 import type { PlayOptions, TsxRunnerOptions } from './types'
@@ -8,9 +6,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { DEFAULT_PLAY_OPTIONS } from './constants'
 import {
   ensurePackage,
   generateHelp,
+  mergeFlags,
   parseArguments,
   printFileList,
   validateOptions
@@ -181,18 +181,25 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
  * Play CLI main function
  */
 export function play(options?: PlayOptions): void {
+  // Get default flags
+  const defaultOptions = DEFAULT_PLAY_OPTIONS
+
+  // Merge options with defaults
   const {
-    name = 'play',
-    version = '1.0.0',
-    description = 'A simple TypeScript playground CLI',
-    flags,
-    rootDir,
-    tsconfig,
-    autoInstall = false
+    name = defaultOptions.name,
+    version = defaultOptions.version,
+    description = defaultOptions.description,
+    flags: userFlags,
+    rootDir = defaultOptions.rootDir,
+    tsconfig = defaultOptions.tsconfig,
+    autoInstall = defaultOptions.autoInstall
   } = options || {}
 
+  // Merge flags: default flags + user custom flags
+  const flags = mergeFlags(userFlags, defaultOptions.flags)
+
   // Validate options
-  validateOptions(options || {})
+  validateOptions({ rootDir, tsconfig } as PlayOptions)
 
   const args = parseArguments(process.argv.slice(2), flags)
 
@@ -249,59 +256,7 @@ export function play(options?: PlayOptions): void {
 
 // ==================== Configuration & Execution ====================
 
-const playOptions: PlayOptions = {
-  name: 'play-tsx',
-  version: '1.0.0',
-  description: 'Enhanced TypeScript playground powered by tsx',
-  flags: {
-    version: {
-      type: Boolean,
-      alias: 'v',
-      description: 'Show version number'
-    },
-    help: {
-      type: Boolean,
-      alias: 'h',
-      description: 'Show help information'
-    },
-    file: {
-      type: String,
-      alias: 'f',
-      default: 'index',
-      description: 'File to run',
-      parameter: '<path>'
-    },
-    list: {
-      type: Boolean,
-      alias: 'l',
-      default: false,
-      description: 'List available files'
-    },
-    watch: {
-      type: Boolean,
-      alias: 'w',
-      default: false,
-      description: 'Enable watch mode'
-    },
-    tsconfig: {
-      type: String,
-      alias: 't',
-      description: 'Path to tsconfig.json',
-      parameter: '<path>'
-    },
-    debug: {
-      type: Boolean,
-      alias: 'd',
-      default: false,
-      description: 'Enable debug output'
-    }
-  },
-  rootDir: process.env.PLAY_TSX_ROOT_DIR || './playground',
-  tsconfig: process.env.PLAY_TSX_TSCONFIG || './tsconfig.json',
-  autoInstall: process.env.PLAY_TSX_AUTO_INSTALL === 'true'
-}
-
 // Only run if this is the main module
 if (import.meta.url === `file://${process.argv[1]}`) {
-  play(playOptions)
+  play(DEFAULT_PLAY_OPTIONS)
 }

@@ -454,3 +454,26 @@ export function validateOptions(options: PlayOptions): void {
     }
   }
 }
+
+/**
+ * Merge flags (user flags take precedence, but don't override completely)
+ */
+export function mergeFlags(defaultFlags?: Flags, userFlags?: Flags): Flags {
+  if (!defaultFlags && !userFlags) {
+    return {}
+  }
+
+  if (!userFlags) {
+    return defaultFlags || {}
+  }
+
+  if (!defaultFlags) {
+    return userFlags
+  }
+
+  // Merge: user flags override default flags with same name
+  return {
+    ...defaultFlags,
+    ...userFlags
+  }
+}
