@@ -1,0 +1,62 @@
+{
+  "name": "@king-3/play-tsx",
+  "version": "1.0.0",
+  "description": "Enhanced TypeScript playground powered by tsx - Run .ts files with smart defaults, watch mode, and zero configuration",
+  "type": "module",
+  "keywords": [
+    "typescript",
+    "tsx",
+    "playground",
+    "runner",
+    "watch",
+    "cli",
+    "development",
+    "ts-node",
+    "typescript-runner"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/coderking3/play-tsx#readme",
+  "bugs": {
+    "url": "https://github.com/coderking3/play-tsx/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderking3/play-tsx.git"
+  },
+  "author": "king3 <w2196592083@gmail.com>",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/play.js",
+  "module": "./dist/play.js",
+  "types": "./dist/play.d.ts",
+  "exports": {
+    ".": "./dist/play.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "play": "./dist/play.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "format": "prettier . --write",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "release": "bumpp"
+  },
+  "dependencies": {
+    "tsx": "^4.20.6"
+  },
+  "devDependencies": {
+    "@king-3/eslint-config": "^2.0.0",
+    "@king-3/prettier-config": "^1.0.2",
+    "@types/node": "^24.5.2",
+    "bumpp": "^10.2.3",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "tsdown": "^0.15.5"
+  }
+}
