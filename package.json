@@ -1,6 +1,6 @@
 {
   "name": "@king-3/play-tsx",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Enhanced TypeScript playground powered by tsx - Run .ts files with smart defaults, watch mode, and zero configuration",
   "type": "module",
   "keywords": [
