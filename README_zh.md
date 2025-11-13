@@ -40,12 +40,11 @@ yarn add -D @king-3/play-tsx
 pnpm play
 
 # 运行指定文件
-pnpm play test.ts
-pnpm play -f other
+play -f other            # 运行 playground/other.ts
 
 # 启用监听模式
-pnpm play --watch test.ts
-pnpm play -w -f other
+pnpm play --watch test   # 运行 playground/test.ts 并监听
+pnpm play -w -f other    # 运行 playground/other.ts 并监听
 
 # 列出可用文件
 pnpm play --list
@@ -86,19 +85,18 @@ play -v
 ```bash
 # 基本用法
 play                          # 运行 playground/index.ts
-play file.ts                  # 运行 playground/file.ts
 play -f other                 # 运行 playground/other.ts
 
 # 监听模式
-play --watch file.ts          # 启用监听模式
+play --watch -f file          # 启用监听模式
 play -w -f other              # 监听 + 指定文件
 
 # 自定义 tsconfig
-play --tsconfig ./tsconfig.dev.json file.ts
-play -t ./tsconfig.dev.json -w file.ts
+play --tsconfig ./tsconfig.dev.json -f file
+play -t ./tsconfig.dev.json -w -f file
 
 # 调试模式
-play --debug file.ts          # 显示调试信息
+play --debug -f file          # 显示调试信息
 play -d -w -f other           # 调试 + 监听 + 文件
 
 # 列出文件
@@ -111,7 +109,7 @@ play -l                       # 简写形式
 ### 编程方式使用
 
 ```typescript
-import { play } from '@king-3/play-tsx'
+import { play } from 'play-tsx'
 
 play({
   name: 'play-tsx',
@@ -187,231 +185,13 @@ your-project/
 4. 项目根目录中的 `tsconfig.json`
 5. tsx 默认配置
 
-## 💡 使用场景
+## 📄 许可证
 
-### 快速原型开发
-
-```bash
-# 创建临时测试文件并立即运行
-echo 'console.log("Hello World")' > playground/hello.ts
-play hello
-```
-
-### API 测试
-
-```typescript
-// playground/api-test.ts
-const response = await fetch('https://api.example.com/data')
-const data = await response.json()
-console.log(data)
-```
-
-```bash
-play api-test
-```
-
-### 算法练习
-
-```typescript
-// playground/algorithm.ts
-function quickSort(arr: number[]): number[] {
-  // 你的实现
-}
-
-console.log(quickSort([3, 1, 4, 1, 5, 9, 2, 6]))
-```
-
-```bash
-play --watch algorithm  # 保存时自动重新运行
-```
-
-### 学习新特性
-
-```typescript
-// playground/learn/decorators.ts
-function log(target: any, key: string) {
-  console.log(`${key} was called`)
-}
-
-class Example {
-  @log
-  method() {}
-}
-```
-
-```bash
-play learn/decorators
-```
-
-## 🎯 最佳实践
-
-### 1. 组织你的 Playground
-
-```
-playground/
-├── index.ts           # 主入口
-├── experiments/       # 实验性代码
-│   ├── new-api.ts
-│   └── performance.ts
-├── learn/            # 学习笔记
-│   ├── async.ts
-│   └── generics.ts
-└── tests/            # 快速测试
-    └── utils.ts
-```
-
-### 2. 使用环境变量配置
-
-```bash
-# .env.local
-PLAY_TSX_ROOT_DIR=./src/playground
-PLAY_TSX_TSCONFIG=./tsconfig.playground.json
-```
-
-### 3. 添加便捷脚本
-
-```json
-{
-  "scripts": {
-    "play": "play",
-    "play:watch": "play --watch",
-    "play:debug": "play --debug",
-    "play:list": "play --list"
-  }
-}
-```
-
-### 4. 自定义 TypeScript 配置
-
-```json
-// tsconfig.playground.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "strict": false, // 放宽检查以便快速实验
-    "noUnusedLocals": false, // 允许未使用的变量
-    "noUnusedParameters": false
-  },
-  "include": ["playground/**/*"]
-}
-```
-
-## 🔍 常见问题
-
-### Q: 如何运行子目录中的文件？
-
-```bash
-# 方式 1: 使用相对路径
-play experiments/new-api
-
-# 方式 2: 使用 -f 标志
-play -f experiments/new-api
-```
-
-### Q: 如何更改默认目录？
-
-```bash
-# 方式 1: 环境变量
-PLAY_TSX_ROOT_DIR=./src pnpm play
-
-# 方式 2: 编程方式配置
-play({ rootDir: './src' })
-```
-
-### Q: 监听模式不工作？
-
-确保你使用了正确的标志：
-
-```bash
-play --watch test.ts  # ✅ 正确
-play -w test.ts       # ✅ 正确
-play test.ts --watch  # ✅ 也可以
-```
-
-### Q: 如何使用自定义 tsconfig？
-
-```bash
-# 命令行指定
-play --tsconfig ./tsconfig.dev.json test.ts
-
-# 或使用环境变量
-PLAY_TSX_TSCONFIG=./tsconfig.dev.json play test.ts
-```
-
-## 🚀 高级用法
-
-### 与其他工具结合
-
-```bash
-# 与 nodemon 结合（外部监听）
-nodemon --exec "play test" --watch playground
-
-# 与 concurrently 结合（并行运行）
-concurrently "play api" "play worker"
-
-# 管道输出
-play test | grep "Error"
-```
-
-### 调试技巧
-
-```bash
-# 启用详细输出
-play --debug test.ts
-
-# 结合 Node.js 调试器
-node --inspect $(which play) test.ts
-```
-
-### CI/CD 集成
-
-```yaml
-# .github/workflows/test.yml
-name: Test
-on: [push]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-      - run: npm install
-      - run: npm run play test
-```
+MIT License © 2025 [king3](https://github.com/coderking3)
 
 ## 🤝 贡献
 
 欢迎贡献、问题反馈和功能请求！
-
-随时查看 [issues 页面](https://github.com/coderking3/play-tsx/issues)。
-
-### 开发指南
-
-```bash
-# 克隆仓库
-git clone https://github.com/coderking3/play-tsx.git
-cd play-tsx
-
-# 安装依赖
-pnpm install
-
-# 开发模式
-pnpm dev
-
-# 构建
-pnpm build
-
-# 测试
-pnpm test
-```
-
-## 📄 许可证
-
-MIT License © 2024 [king3](https://github.com/coderking3)
-
-## 🤝 贡献
-
-欢迎提交贡献、问题和功能请求！
 
 - GitHub: [@coderking3](https://github.com/coderking3)
 - 问题反馈：[GitHub Issues](https://github.com/coderking3/play-tsx/issues)

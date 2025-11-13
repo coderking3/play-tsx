@@ -40,12 +40,11 @@ yarn add -D @king-3/play-tsx
 pnpm play
 
 # Run specific file
-pnpm play test.ts
-pnpm play -f other
+play play -f other            # Run playground/other.ts
 
 # Enable watch mode
-pnpm play --watch test.ts
-pnpm play -w -f other
+pnpm play --watch test        # Run playground/test.ts and watch
+pnpm play -w -f other         # Run playground/other.ts and watch
 
 # List available files
 pnpm play --list
@@ -86,19 +85,18 @@ play -v
 ```bash
 # Basic usage
 play                          # Run playground/index.ts
-play file.ts                  # Run playground/file.ts
 play -f other                 # Run playground/other.ts
 
 # Watch mode
-play --watch file.ts          # Enable watch mode
+play --watch -f file          # Enable watch mode
 play -w -f other              # Watch + specify file
 
 # Custom tsconfig
-play --tsconfig ./tsconfig.dev.json file.ts
-play -t ./tsconfig.dev.json -w file.ts
+play --tsconfig ./tsconfig.dev.json -f file
+play -t ./tsconfig.dev.json -w -f file
 
 # Debug mode
-play --debug file.ts          # Show debug information
+play --debug -f file          # Show debug information
 play -d -w -f other           # Debug + watch + file
 
 # List files
@@ -189,7 +187,7 @@ The tool resolves configuration in the following priority:
 
 ## 📄 License
 
-MIT License © 2024 [king3](https://github.com/coderking3)
+MIT License © 2025 [king3](https://github.com/coderking3)
 
 ## 🤝 Contributing
 
