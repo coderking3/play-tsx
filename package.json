@@ -25,23 +25,22 @@
   },
   "author": "king3 <w2196592083@gmail.com>",
   "files": [
+    "bin",
     "dist"
   ],
   "main": "./dist/play.js",
-  "module": "./dist/play.js",
   "types": "./dist/play.d.ts",
   "exports": {
-    ".": "./dist/play.js",
-    "./package.json": "./package.json"
+    ".": "./dist/play.js"
   },
   "bin": {
-    "play": "./dist/play.js"
+    "play": "./bin/index.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "node scripts/build.js",
     "format": "prettier . --write",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -57,6 +56,6 @@
     "bumpp": "^10.2.3",
     "eslint": "^9.36.0",
     "prettier": "^3.6.2",
-    "tsdown": "^0.15.5"
+    "tsdown": "^0.15.12"
   }
 }

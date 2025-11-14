@@ -253,10 +253,3 @@ export function play(options?: PlayOptions): void {
     debug: args.debug || false
   })
 }
-
-// ==================== Configuration & Execution ====================
-
-// Only run if this is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
-  play(DEFAULT_PLAY_OPTIONS)
-}
