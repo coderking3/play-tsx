@@ -25,7 +25,7 @@ export const SKIP_DIRECTORIES = [
 // Default configuration (used when running as CLI)
 export const DEFAULT_PLAY_OPTIONS: PlayOptions = {
   name: 'play-tsx',
-  version: '1.2.0',
+  version: '1.3.0',
   description: 'Enhanced TypeScript playground powered by tsx',
   flags: {
     version: {
