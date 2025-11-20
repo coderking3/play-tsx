@@ -1,5 +1,3 @@
-/* util.ts */
-
 /* eslint-disable no-console */
 import type {
   EnsureOptions,
@@ -21,6 +19,8 @@ import {
   NODE_RESERVED_NAMES,
   SKIP_DIRECTORIES
 } from './constants'
+
+import { bold, cyan, green, red, yellow, blue, dim } from 'ansis'
 
 // ==================== Argument Parsing Helpers ====================
 
@@ -66,7 +66,7 @@ function parseFlagValue(schema: FlagSchema, rawValue: any): any {
     try {
       return type(rawValue)
     } catch (error) {
-      console.warn(`⚠️ Failed to parse value "${rawValue}":`, error)
+      console.warn(`${yellow('⚠️ Failed to parse value:')} ${bold(rawValue)} ${dim(String(error))}`)
       return defaultValue
     }
   }

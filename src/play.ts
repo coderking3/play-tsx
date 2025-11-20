@@ -16,6 +16,8 @@ import {
   validateOptions
 } from './util'
 
+import { bold, cyan, green, red, yellow, magenta } from 'ansis'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const __root = process.cwd()
@@ -56,7 +58,7 @@ function resolveTsconfigPath(
     if (fs.existsSync(resolvedPath)) {
       return resolvedPath
     } else {
-      console.warn(`⚠️  Specified tsconfig does not exist: ${resolvedPath}`)
+      console.warn(yellow(`⚠️  tsconfig not found:`) + cyan(resolvedPath))
     }
   }
 
@@ -103,22 +105,27 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
   tsxCommand.push(filePath)
 
   // Display execution info
-  console.log(`✅ Running: ${path.relative(process.cwd(), filePath)}`)
+  console.log(
+    green(`\n✅ Executing:`) +
+      ' ' +
+      bold(cyan(path.relative(process.cwd(), filePath)))
+  )
   if (watch) {
-    console.log(`👀 Watch mode enabled`)
+    console.log(magenta(`👀 Watch mode enabled`))
   }
   if (tsconfigPath) {
     console.log(
-      `📝 Using tsconfig: ${path.relative(process.cwd(), tsconfigPath)}`
+      cyan(`📝 Using tsconfig: `) +
+        bold(path.relative(process.cwd(), tsconfigPath))
     )
   }
 
   if (debug) {
-    console.log('\n🔍 Debug Info:')
-    console.log('  File:', filePath)
-    console.log('  Tsconfig:', tsconfigPath || 'default')
-    console.log('  Watch:', watch)
-    console.log('  Command:', ['tsx', ...tsxCommand].join(' '))
+    console.log(bold('\n🔍 Debug Info'))
+    console.log('  ' + cyan('File:       ') + filePath)
+    console.log('  ' + cyan('Tsconfig:   ') + (tsconfigPath || 'default'))
+    console.log('  ' + cyan('Watch:      ') + watch)
+    console.log('  ' + cyan('Command:    ') + ['tsx', ...tsxCommand].join(' '))
   }
 
   console.log('')
@@ -134,7 +141,7 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
     try {
       ensurePackage('tsx')
     } catch {
-      console.error('❌ Failed to ensure tsx is installed')
+      console.error(red('❌ Failed to install tsx automatically'))
       process.exit(1)
     }
   }
@@ -143,33 +150,35 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
   const child = spawn('tsx', tsxCommand, spawnOptions)
 
   child.on('error', (err: NodeJS.ErrnoException) => {
-    console.error('\n❌ Execution failed:', err.message)
+    console.error('\n' + red('❌ Execution failed: ') + err.message)
     if (err.code === 'ENOENT') {
-      console.log('\n💡 Please install tsx first:')
-      console.log('   npm install -D tsx')
-      console.log('   pnpm add -D tsx')
-      console.log('   yarn add -D tsx')
+      console.log(yellow('\n💡 tsx is not installed. Install via:'))
+      console.log(cyan('   npm install -D tsx'))
+      console.log(cyan('   pnpm add -D tsx'))
+      console.log(cyan('   yarn add -D tsx'))
     }
     process.exit(1)
   })
 
   child.on('exit', (code) => {
     if (code !== 0 && code !== null) {
-      console.log(`\n⚠️  Process exited with code: ${code}`)
+      console.log(
+        yellow(`\n⚠️  Process exited with code:`) + ' ' + red(String(code))
+      )
     }
     process.exit(code || 0)
   })
 
   // Handle Ctrl+C gracefully
   process.on('SIGINT', () => {
-    console.log('\n👋 Exiting...')
+    console.log(magenta('\n👋 Exiting...'))
     child.kill('SIGINT')
     process.exit(0)
   })
 
   // Handle SIGTERM
   process.on('SIGTERM', () => {
-    console.log('\n👋 Received SIGTERM, exiting...')
+    console.log(magenta('\n👋 Received SIGTERM, exiting...'))
     child.kill('SIGTERM')
     process.exit(0)
   })
@@ -205,8 +214,15 @@ export function play(options?: PlayOptions): void {
 
   // Handle version flag
   if (args.version) {
+    // console.log(
+    //   `  ● ${name} cli ─ v${version}${description ? `\n  ${description}` : ''}`
+    // )
     console.log(
-      `  ● ${name} cli ─ v${version}${description ? `\n  ${description}` : ''}`
+      bold(
+        `${green(`● ${name} CLI`)} ${cyan('v' + version)}${
+          description ? `\n  ${yellow(description)}` : ''
+        }\n`
+      )
     )
     process.exit(0)
   }
@@ -222,7 +238,7 @@ export function play(options?: PlayOptions): void {
     if (rootDir) {
       printFileList(rootDir)
     } else {
-      console.log('❌ No root directory configured')
+      console.log(red('❌ No root directory configured'))
     }
     process.exit(0)
   }
@@ -234,12 +250,12 @@ export function play(options?: PlayOptions): void {
 
   // Check if file exists
   if (!fs.existsSync(filePath)) {
-    console.error(`❌ File does not exist: ${filePath}`)
+    console.error(red(`❌ File not found:`) + ' ' + cyan(filePath))
 
     if (rootDir) {
       console.log('')
       printFileList(rootDir)
-      console.log('💡 Tip: Use --help to view all options')
+      console.log(yellow('\n💡 Tip: Use --help to view options'))
     }
 
     process.exit(1)

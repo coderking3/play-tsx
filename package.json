@@ -40,9 +40,9 @@
     "access": "public"
   },
   "scripts": {
-    "play": "node bin/index.js",
-    "build": "node scripts/build.js",
-    "format": "prettier . --write",
+    "play": "tsx src/cli.js",
+    "build": "tsx scripts/build.ts",
+    "format": "prettier --write .",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "release": "bumpp"
@@ -51,12 +51,13 @@
     "tsx": "^4.20.6"
   },
   "devDependencies": {
-    "@king-3/eslint-config": "^2.0.0",
-    "@king-3/prettier-config": "^1.0.2",
+    "@king-3/eslint-config": "^3.1.0",
+    "@king-3/prettier-config": "^3.1.0",
     "@types/node": "^24.5.2",
+    "ansis": "^4.2.0",
     "bumpp": "^10.2.3",
     "eslint": "^9.36.0",
     "prettier": "^3.6.2",
-    "tsdown": "^0.15.12"
+    "tsdown": "^0.16.5"
   }
 }
