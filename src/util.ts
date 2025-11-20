@@ -20,7 +20,7 @@ import {
   SKIP_DIRECTORIES
 } from './constants'
 
-import { bold, cyan, green, red, yellow, blue, dim } from 'ansis'
+import { bold, cyan, green, red, yellow, blue, dim, magenta } from 'ansis'
 
 // ==================== Argument Parsing Helpers ====================
 
@@ -66,7 +66,9 @@ function parseFlagValue(schema: FlagSchema, rawValue: any): any {
     try {
       return type(rawValue)
     } catch (error) {
-      console.warn(`${yellow('⚠️ Failed to parse value:')} ${bold(rawValue)} ${dim(String(error))}`)
+      console.warn(
+        `${yellow('⚠️ Failed to parse value:')} ${bold(rawValue)} ${dim(String(error))}`
+      )
       return defaultValue
     }
   }
@@ -189,7 +191,9 @@ export function parseArguments(
         allowPositionals: true
       })
     } catch (error) {
-      console.error('❌ Error parsing arguments:', error)
+      console.error(
+        bold(red('❌ Error parsing arguments: ')) + red(String(error))
+      )
     }
   }
 
@@ -245,7 +249,7 @@ export function getAvailableFiles(
 
   // Check if directory exists
   if (!fs.existsSync(targetDir)) {
-    console.warn(`⚠️ Directory does not exist: ${targetDir}`)
+    console.warn(yellow('⚠️ Directory does not exist: ') + dim(targetDir))
     return []
   }
 
@@ -278,7 +282,7 @@ export function getAvailableFiles(
         }
       }
     } catch {
-      console.warn(`⚠️ Cannot read directory: ${dir}`)
+      console.warn(yellow('⚠️ Cannot read directory: ') + dim(dir))
     }
   }
 
@@ -315,11 +319,15 @@ export function printFileList(rootDir: string): void {
   const files = getAvailableFiles(rootDir, false) // Don't use cache for list command
 
   if (files.length === 0) {
-    console.log(`\n❌ No .ts files found in ${rootDir} directory\n`)
+    console.log(bold(red(`\n❌ No .ts files found in ${rootDir} directory\n`)))
     return
   }
 
-  console.log(`\n📁 Available files in ${rootDir} (${files.length} total):\n`)
+  console.log(
+    `\n${bold(cyan('📁 Available files:'))} ${blue(rootDir)} ${dim(
+      `(${files.length} total)`
+    )}\n`
+  )
 
   // Group by directory
   const grouped: Record<string, FileInfo[]> = {}
@@ -337,7 +345,7 @@ export function printFileList(rootDir: string): void {
   // Output
   let index = 1
   for (const [dir, fileList] of Object.entries(grouped)) {
-    console.log(`${dir}:`)
+    console.log(bold(`${dir}:`))
     fileList.forEach((file) => {
       console.log(`  ${index.toString().padStart(2)}. ${file.name}`)
       index++
@@ -400,7 +408,7 @@ export function ensurePackage(pkg: string, options: EnsureOptions = {}): void {
     try {
       const cmd = getInstallCommand(manager, pkg, dev)
       execSync(cmd, { stdio: silent ? 'ignore' : 'inherit' })
-      console.log(`✅ Successfully installed ${pkg}`)
+      console.log(bold(green('✅ Installed: '))+green(pkg))
     } catch (error) {
       console.error(`❌ Failed to install ${pkg}:`, error)
       throw error
@@ -443,14 +451,14 @@ export function validateOptions(options: PlayOptions): void {
   if (rootDir) {
     const resolvedDir = path.resolve(process.cwd(), rootDir)
     if (!fs.existsSync(resolvedDir)) {
-      console.warn(`⚠️  Root directory does not exist: ${resolvedDir}`)
+      console.warn(yellow('⚠️ Root directory not found: ') + dim(resolvedDir))
     }
   }
 
   if (tsconfig) {
     const resolvedConfig = path.resolve(process.cwd(), tsconfig)
     if (!fs.existsSync(resolvedConfig)) {
-      console.warn(`⚠️  Tsconfig file does not exist: ${resolvedConfig}`)
+      console.warn(yellow('⚠️ Tsconfig not found: ') + dim(resolvedConfig))
     }
   }
 }
