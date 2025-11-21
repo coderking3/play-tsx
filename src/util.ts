@@ -8,12 +8,14 @@ import type {
   ParsedArgs,
   PlayOptions
 } from './types'
+
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs as nodeParseArgs } from 'node:util'
+
 import { blue, bold, cyan, dim, green, magenta, red, yellow } from 'ansis'
 
 import {

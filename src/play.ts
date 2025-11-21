@@ -1,14 +1,17 @@
 /* eslint-disable no-console */
 import type { SpawnOptions } from 'node:child_process'
+
 import type { PlayOptions, TsxRunnerOptions } from './types'
+
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { blue, bold, cyan, green, magenta, red, yellow } from 'ansis'
-import { DEFAULT_PLAY_OPTIONS } from './constants'
 
+import { blue, bold, cyan, green, magenta, red, yellow } from 'ansis'
+
+import { DEFAULT_PLAY_OPTIONS } from './constants'
 import {
   ensurePackage,
   generateHelp,
