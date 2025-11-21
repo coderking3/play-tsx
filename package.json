@@ -1,8 +1,8 @@
 {
-  "name": "@king-3/play-tsx",
   "version": "1.3.0",
-  "description": "Enhanced TypeScript playground powered by tsx - Run .ts files with smart defaults, watch mode, and zero configuration",
   "type": "module",
+  "name": "@king-3/play-tsx",
+  "description": "Enhanced TypeScript playground powered by tsx - Run .ts files with smart defaults, watch mode, and zero configuration",
   "keywords": [
     "typescript",
     "tsx",
@@ -49,8 +49,8 @@
     "release": "bumpp"
   },
   "devDependencies": {
-    "@king-3/eslint-config": "^3.1.0",
-    "@king-3/prettier-config": "^3.1.0",
+    "@king-3/eslint-config": "^4.3.0",
+    "@king-3/prettier-config": "^3.2.0",
     "@types/node": "^24.5.2",
     "ansis": "^4.2.0",
     "bumpp": "^10.2.3",
