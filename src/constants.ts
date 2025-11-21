@@ -22,6 +22,9 @@ export const SKIP_DIRECTORIES = [
   '.output'
 ] as const
 
+const { PLAY_TSX_ROOT_DIR, PLAY_TSX_TSCONFIG, PLAY_TSX_AUTO_INSTALL } =
+  process.env
+
 // Default configuration (used when running as CLI)
 export const DEFAULT_PLAY_OPTIONS: PlayOptions = {
   name: 'play-tsx',
@@ -70,7 +73,7 @@ export const DEFAULT_PLAY_OPTIONS: PlayOptions = {
       description: 'Enable debug output'
     }
   },
-  rootDir: process.env.PLAY_TSX_ROOT_DIR || './playground',
-  tsconfig: process.env.PLAY_TSX_TSCONFIG || './tsconfig.json',
-  autoInstall: process.env.PLAY_TSX_AUTO_INSTALL === 'true'
+  rootDir: PLAY_TSX_ROOT_DIR || './playground',
+  tsconfig: PLAY_TSX_TSCONFIG || './tsconfig.json',
+  autoInstall: PLAY_TSX_AUTO_INSTALL ? PLAY_TSX_AUTO_INSTALL === 'true' : true
 }

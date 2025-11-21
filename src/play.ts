@@ -6,7 +6,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { blue, bold, cyan, green, magenta, red, yellow } from 'ansis'
 import { DEFAULT_PLAY_OPTIONS } from './constants'
+
 import {
   ensurePackage,
   generateHelp,
@@ -15,8 +17,6 @@ import {
   printFileList,
   validateOptions
 } from './util'
-
-import { bold, cyan, green, red, yellow, magenta } from 'ansis'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -58,7 +58,9 @@ function resolveTsconfigPath(
     if (fs.existsSync(resolvedPath)) {
       return resolvedPath
     } else {
-      console.warn(yellow(`⚠️  tsconfig not found:`) + cyan(resolvedPath))
+      console.warn(
+        yellow('⚠️  tsconfig not found: ') + bold(cyan(resolvedPath))
+      )
     }
   }
 
@@ -106,26 +108,29 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
 
   // Display execution info
   console.log(
-    green(`\n✅ Executing:`) +
-      ' ' +
-      bold(cyan(path.relative(process.cwd(), filePath)))
+    bold(green('\n✅ Executing: ')) +
+      cyan(path.relative(process.cwd(), filePath))
   )
+
   if (watch) {
-    console.log(magenta(`👀 Watch mode enabled`))
+    console.log(bold(magenta('👀 Watch mode enabled')))
   }
+
   if (tsconfigPath) {
     console.log(
-      cyan(`📝 Using tsconfig: `) +
-        bold(path.relative(process.cwd(), tsconfigPath))
+      bold(cyan('📝 Using tsconfig: ')) +
+        yellow(path.relative(process.cwd(), tsconfigPath))
     )
   }
 
   if (debug) {
-    console.log(bold('\n🔍 Debug Info'))
-    console.log('  ' + cyan('File:       ') + filePath)
-    console.log('  ' + cyan('Tsconfig:   ') + (tsconfigPath || 'default'))
-    console.log('  ' + cyan('Watch:      ') + watch)
-    console.log('  ' + cyan('Command:    ') + ['tsx', ...tsxCommand].join(' '))
+    console.log(bold(blue('\n🔍 Debug Info')))
+    console.log(`  ${bold('File:')}       ${cyan(filePath)}`)
+    console.log(`  ${bold('Tsconfig:')}   ${cyan(tsconfigPath || 'default')}`)
+    console.log(`  ${bold('Watch:')}      ${yellow(String(watch))}`)
+    console.log(
+      `  ${bold('Command:')}    ${green(['tsx', ...tsxCommand].join(' '))}`
+    )
   }
 
   console.log('')
@@ -150,12 +155,12 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
   const child = spawn('tsx', tsxCommand, spawnOptions)
 
   child.on('error', (err: NodeJS.ErrnoException) => {
-    console.error('\n' + red('❌ Execution failed: ') + err.message)
+    console.error(bold(red('\n❌ Execution failed: ')) + red(err.message))
     if (err.code === 'ENOENT') {
-      console.log(yellow('\n💡 tsx is not installed. Install via:'))
-      console.log(cyan('   npm install -D tsx'))
-      console.log(cyan('   pnpm add -D tsx'))
-      console.log(cyan('   yarn add -D tsx'))
+      console.log(bold(yellow('\n💡 tsx is not installed. Install via:')))
+      console.log(green('   npm install -D tsx'))
+      console.log(green('   pnpm add -D tsx'))
+      console.log(green('   yarn add -D tsx'))
     }
     process.exit(1)
   })
@@ -163,7 +168,8 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
   child.on('exit', (code) => {
     if (code !== 0 && code !== null) {
       console.log(
-        yellow(`\n⚠️  Process exited with code:`) + ' ' + red(String(code))
+        bold(yellow('\n⚠️  Process exited with code: ')) +
+          bold(red(String(code)))
       )
     }
     process.exit(code || 0)
@@ -171,14 +177,14 @@ function runTsx(filePath: string, options: TsxRunnerOptions = {}): void {
 
   // Handle Ctrl+C gracefully
   process.on('SIGINT', () => {
-    console.log(magenta('\n👋 Exiting...'))
+    console.log(bold(magenta('\n👋 Exiting...')))
     child.kill('SIGINT')
     process.exit(0)
   })
 
   // Handle SIGTERM
   process.on('SIGTERM', () => {
-    console.log(magenta('\n👋 Received SIGTERM, exiting...'))
+    console.log(bold(magenta('\n👋 Received SIGTERM, exiting...')))
     child.kill('SIGTERM')
     process.exit(0)
   })
@@ -214,15 +220,12 @@ export function play(options?: PlayOptions): void {
 
   // Handle version flag
   if (args.version) {
-    // console.log(
-    //   `  ● ${name} cli ─ v${version}${description ? `\n  ${description}` : ''}`
-    // )
     console.log(
-      bold(
-        `${green(`● ${name} CLI`)} ${cyan('v' + version)}${
-          description ? `\n  ${yellow(description)}` : ''
-        }\n`
-      )
+      `${
+        bold(cyan(`${name?.toLocaleUpperCase()} CLI `)) +
+        bold(green(`v${version}`)) +
+        (description ? yellow(`\n${description}`) : '')
+      }\n`
     )
     process.exit(0)
   }
@@ -238,11 +241,10 @@ export function play(options?: PlayOptions): void {
     if (rootDir) {
       printFileList(rootDir)
     } else {
-      console.log(red('❌ No root directory configured'))
+      console.log(bold(red('❌ No root directory configured')))
     }
     process.exit(0)
   }
-
   // Resolve file and tsconfig paths
   const file = args.file || 'index'
   const filePath = resolveFilePath(file, rootDir)
@@ -250,12 +252,12 @@ export function play(options?: PlayOptions): void {
 
   // Check if file exists
   if (!fs.existsSync(filePath)) {
-    console.error(red(`❌ File not found:`) + ' ' + cyan(filePath))
+    console.error(bold(red('❌ File not found: ')) + cyan(filePath))
 
     if (rootDir) {
       console.log('')
       printFileList(rootDir)
-      console.log(yellow('\n💡 Tip: Use --help to view options'))
+      console.log(`${bold(yellow('\n💡 Tip: '))}Use --help to view options`)
     }
 
     process.exit(1)

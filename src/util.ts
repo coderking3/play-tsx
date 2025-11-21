@@ -14,13 +14,13 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs as nodeParseArgs } from 'node:util'
+import { blue, bold, cyan, dim, green, magenta, red, yellow } from 'ansis'
+
 import {
   FILE_CACHE_TTL,
   NODE_RESERVED_NAMES,
   SKIP_DIRECTORIES
 } from './constants'
-
-import { bold, cyan, green, red, yellow, blue, dim, magenta } from 'ansis'
 
 // ==================== Argument Parsing Helpers ====================
 
@@ -67,7 +67,9 @@ function parseFlagValue(schema: FlagSchema, rawValue: any): any {
       return type(rawValue)
     } catch (error) {
       console.warn(
-        `${yellow('⚠️ Failed to parse value:')} ${bold(rawValue)} ${dim(String(error))}`
+        `${yellow('⚠️  Failed to parse value: ') + bold(rawValue)} ${dim(
+          String(error)
+        )}`
       )
       return defaultValue
     }
@@ -249,7 +251,9 @@ export function getAvailableFiles(
 
   // Check if directory exists
   if (!fs.existsSync(targetDir)) {
-    console.warn(yellow('⚠️ Directory does not exist: ') + dim(targetDir))
+    console.warn(
+      bold(yellow('⚠️  Directory does not exist: ')) + cyan(targetDir)
+    )
     return []
   }
 
@@ -282,7 +286,7 @@ export function getAvailableFiles(
         }
       }
     } catch {
-      console.warn(yellow('⚠️ Cannot read directory: ') + dim(dir))
+      console.warn(bold(yellow('⚠️  Cannot read directory: ')) + cyan(dir))
     }
   }
 
@@ -319,14 +323,16 @@ export function printFileList(rootDir: string): void {
   const files = getAvailableFiles(rootDir, false) // Don't use cache for list command
 
   if (files.length === 0) {
-    console.log(bold(red(`\n❌ No .ts files found in ${rootDir} directory\n`)))
+    console.log(
+      bold(red(`\n❌ No .ts files found in `)) +
+        cyan(rootDir) +
+        bold(red(' directory\n'))
+    )
     return
   }
 
   console.log(
-    `\n${bold(cyan('📁 Available files:'))} ${blue(rootDir)} ${dim(
-      `(${files.length} total)`
-    )}\n`
+    `\n${bold(cyan('📁 Available files:'))} ${blue(rootDir)} ${dim(`(${files.length} total)`)}\n`
   )
 
   // Group by directory
@@ -345,9 +351,9 @@ export function printFileList(rootDir: string): void {
   // Output
   let index = 1
   for (const [dir, fileList] of Object.entries(grouped)) {
-    console.log(bold(`${dir}:`))
+    console.log(bold(magenta(`${dir}:`)))
     fileList.forEach((file) => {
-      console.log(`  ${index.toString().padStart(2)}. ${file.name}`)
+      console.log(`  ${dim(index.toString().padStart(2))}. ${cyan(file.name)}`)
       index++
     })
     console.log('')
@@ -360,32 +366,42 @@ export function printFileList(rootDir: string): void {
 export function generateHelp(options: PlayOptions): string {
   const { name, version, description, flags } = options
 
-  let help = `  ● ${name} cli ─ v${version}${description ? `\n  ${description}` : ''}`
-  help += '\n\nUsage:\n'
-  help += `  ${name} [options] [value]\n\n`
+  let help =
+    bold(cyan(`${name?.toLocaleUpperCase()} CLI`)) +
+    dim(' ─ ') +
+    bold(green(`v${version}`))
+
+  if (description) {
+    help += `\n${yellow(`  ${description}`)}`
+  }
+
+  help += `\n\n${bold('Usage:')}\n`
+  help += `  ${cyan(name)} ${dim('[options] [value]')}\n\n`
 
   if (flags && Object.keys(flags).length > 0) {
-    help += 'Options:\n'
+    help += `${bold('Options:')}\n`
 
     Object.entries(flags).forEach(([name, schema]) => {
-      const flag = `--${name}`
-      const alias = schema.alias ? `, -${schema.alias}` : ''
-      const param = schema.parameter ? ` ${schema.parameter}` : ''
+      const flag = green(`--${name}`)
+      const alias = schema.alias ? dim(', ') + green(`-${schema.alias}`) : ''
+      const param = schema.parameter ? yellow(` ${schema.parameter}`) : ''
       const desc = schema.description || ''
       const def =
-        schema.default !== undefined ? ` (default: ${schema.default})` : ''
+        schema.default !== undefined
+          ? dim(` (default: ${blue(String(schema.default))})`)
+          : ''
 
-      help += `  ${(flag + alias + param).padEnd(30)} ${desc}${def}\n`
+      help += `  ${(flag + alias + param).padEnd(40)} ${desc}${def}\n`
     })
   }
 
-  help += '\nExamples:\n'
-  help += `  ${name}                      → Run default file (index.ts)\n`
-  help += `  ${name} --file test          → Run test.ts\n`
-  help += `  ${name} --watch -f test      → Run test.ts in watch mode\n`
-  help += `  ${name} --list               → List all available files\n`
-  help += `  ${name} --version            → Show version\n`
-  help += `  ${name} --help               → Show this help\n`
+  help += `\n${bold('Examples:')}\n`
+  help += `  ${cyan(name)}                      ${dim('→')} Run default file (index.ts)\n`
+  help += `  ${cyan(name)} ${green('--file')} ${yellow('test')}          ${dim('→')} Run test.ts\n`
+  help += `  ${cyan(name)} ${green('--watch')} ${green('-f')} ${yellow('test')}      ${dim('→')} Run test.ts in watch mode\n`
+  help += `  ${cyan(name)} ${green('--list')}               ${dim('→')} List all available files\n`
+  help += `  ${cyan(name)} ${green('--version')}            ${dim('→')} Show version\n`
+  help += `  ${cyan(name)} ${green('--help')}               ${dim('→')} Show this help\n`
 
   return help
 }
@@ -403,14 +419,21 @@ export function ensurePackage(pkg: string, options: EnsureOptions = {}): void {
     require.resolve(pkg)
   } catch {
     console.log(
-      `⚠️  Dependency "${pkg}" not found, using ${manager} to install...`
+      yellow('⚠️  Dependency ') +
+        bold(magenta(`"${pkg}"`)) +
+        yellow(' not found, using ') +
+        bold(cyan(manager)) +
+        yellow(' to install...')
     )
     try {
       const cmd = getInstallCommand(manager, pkg, dev)
       execSync(cmd, { stdio: silent ? 'ignore' : 'inherit' })
-      console.log(bold(green('✅ Installed: '))+green(pkg))
+      console.log(bold(green('✅ Installed: ')) + green(pkg))
     } catch (error) {
-      console.error(`❌ Failed to install ${pkg}:`, error)
+      console.error(
+        bold(red('❌ Failed to install ')) + red(pkg) + red(':'),
+        error
+      )
       throw error
     }
   }
@@ -429,14 +452,15 @@ function detectManager(): 'npm' | 'pnpm' | 'yarn' {
 /**
  * Construct installation command
  */
-function getInstallCommand(manager: string, pkg: string, dev: boolean): string {
-  switch (manager) {
-    case 'pnpm':
-      return `pnpm add ${pkg} ${dev ? '-D' : ''}`
-    case 'yarn':
-      return `yarn add ${pkg} ${dev ? '-D' : ''}`
-    default:
-      return `npm install ${pkg} ${dev ? '--save-dev' : ''}`
+function getInstallCommand(
+  manager: 'npm' | 'yarn' | 'pnpm',
+  pkg: string,
+  dev: boolean
+): string {
+  if (manager === 'npm') {
+    return `${manager} install ${pkg} ${dev ? '--save-dev' : ''}`
+  } else {
+    return `${manager} add ${pkg} ${dev ? '-D' : ''}`
   }
 }
 
@@ -451,14 +475,18 @@ export function validateOptions(options: PlayOptions): void {
   if (rootDir) {
     const resolvedDir = path.resolve(process.cwd(), rootDir)
     if (!fs.existsSync(resolvedDir)) {
-      console.warn(yellow('⚠️ Root directory not found: ') + dim(resolvedDir))
+      console.warn(
+        bold(yellow('⚠️  Root directory not found: ')) + cyan(resolvedDir)
+      )
     }
   }
 
   if (tsconfig) {
     const resolvedConfig = path.resolve(process.cwd(), tsconfig)
     if (!fs.existsSync(resolvedConfig)) {
-      console.warn(yellow('⚠️ Tsconfig not found: ') + dim(resolvedConfig))
+      console.warn(
+        bold(yellow('⚠️  Tsconfig not found: ')) + cyan(resolvedConfig)
+      )
     }
   }
 }

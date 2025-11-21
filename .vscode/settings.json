@@ -12,5 +12,5 @@
 
   /* Prettier */
   "prettier.enable": true,
-  "prettier.configPath": "./prettier.config.js"
+  "prettier.configPath": "prettier.config.js"
 }

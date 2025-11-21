@@ -10,7 +10,7 @@ import {
 import { join } from 'node:path'
 import process from 'node:process'
 
-import { bold, cyan, green, red, yellow } from 'ansis'
+import { bold, cyan, dim, green, magenta, red, yellow } from 'ansis'
 
 // Files to remove after build
 const REMOVE_FILES = ['cli.d.mts'] as const
@@ -31,16 +31,24 @@ function removeFile(fileName: string): boolean {
   const filePath = join(distDir, fileName)
 
   if (!existsSync(filePath)) {
-    console.log(yellow(`ℹ️  ${fileName} not found, skipping...`))
+    console.log(
+      dim('  ℹ️  ') + yellow(fileName) + dim(' not found, skipping...')
+    )
     return false
   }
 
   try {
     rmSync(filePath)
-    console.log(green('🗑️  Removed ') + bold(fileName))
+    console.log(dim('  ') + green('🗑️  Removed ') + cyan(fileName))
     return true
   } catch (error) {
-    console.error(red(`❌ Failed to remove ${fileName}: ${formatError(error)}`))
+    console.error(
+      dim('  ') +
+        bold(red('❌ Failed to remove ')) +
+        cyan(fileName) +
+        red(': ') +
+        red(formatError(error))
+    )
     return false
   }
 }
@@ -53,13 +61,26 @@ function renameFile(from: string, to: string): boolean {
   const targetPath = join(distDir, to)
 
   if (!existsSync(sourcePath)) {
-    console.log(yellow(`ℹ️  ${from} not found, skipping...`))
+    console.log(dim('  ℹ️  ') + yellow(from) + dim(' not found, skipping...'))
     return false
   }
 
-  renameSync(sourcePath, targetPath)
-  console.log(green('🔁 Renamed ') + bold(from) + green(' → ') + bold(to))
-  return true
+  try {
+    renameSync(sourcePath, targetPath)
+    console.log(
+      dim('  ') + green('🔁 Renamed ') + cyan(from) + dim(' → ') + magenta(to)
+    )
+    return true
+  } catch (error) {
+    console.error(
+      dim('  ') +
+        bold(red('❌ Failed to rename ')) +
+        cyan(from) +
+        red(': ') +
+        red(formatError(error))
+    )
+    return false
+  }
 }
 
 /**
@@ -69,7 +90,9 @@ function cleanEmptyExports(fileName: string): boolean {
   const filePath = join(distDir, fileName)
 
   if (!existsSync(filePath)) {
-    console.log(yellow(`ℹ️  ${fileName} not found, skipping cleanup...`))
+    console.log(
+      dim('  ℹ️  ') + yellow(fileName) + dim(' not found, skipping...')
+    )
     return false
   }
 
@@ -86,13 +109,20 @@ function cleanEmptyExports(fileName: string): boolean {
     // Only write if content changed
     if (content !== originalContent) {
       writeFileSync(filePath, `${content}\n`, 'utf-8')
-      console.log(green('🧹 Cleaned empty export from ') + bold(fileName))
+      console.log(dim('  ') + green('🧹 Cleaned ') + cyan(fileName))
       return true
     }
 
+    console.log(dim('  ℹ️  ') + cyan(fileName) + dim(' already clean'))
     return false
   } catch (error) {
-    console.error(red(`❌ Failed to clean ${fileName}: ${formatError(error)}`))
+    console.error(
+      dim('  ') +
+        bold(red('❌ Failed to clean ')) +
+        cyan(fileName) +
+        red(': ') +
+        red(formatError(error))
+    )
     return false
   }
 }
@@ -112,35 +142,55 @@ function formatError(error: unknown): string {
 function build() {
   try {
     console.log(bold(cyan('\n🚀 Starting build script...\n')))
-    console.log(yellow('📦 Running tsdown build...'))
+    console.log(bold(yellow('📦 Running tsdown build...')))
 
     execSync('tsdown', { stdio: 'inherit' })
 
-    console.log(bold(cyan('\n🧹 Post-build cleanup...\n')))
+    console.log(bold(cyan('\n🔧 Post-build processing...\n')))
 
-    // Remove unwanted files
-    let removedCount = 0
-    for (const fileName of REMOVE_FILES) {
-      if (removeFile(fileName)) {
-        removedCount++
+    // Step 1: Remove unwanted files
+    if (REMOVE_FILES.length > 0) {
+      console.log(`${bold('Step 1: ')}Removing unwanted files`)
+      let removedCount = 0
+      for (const fileName of REMOVE_FILES) {
+        if (removeFile(fileName)) {
+          removedCount++
+        }
+      }
+      if (removedCount > 0) {
+        console.log(green(`  ✓ Removed ${removedCount} file(s)\n`))
+      } else {
+        console.log(dim('  ✓ No files removed\n'))
       }
     }
 
-    // Clean empty exports from cli.mjs
-    cleanEmptyExports('cli.mjs')
-
-    if (removedCount > 0) {
-      console.log(green(`\n✅ Removed ${removedCount} file(s)`))
+    // Step 2: Clean empty exports
+    console.log(`${bold('Step 2: ')}Cleaning empty exports`)
+    const cleaned = cleanEmptyExports('cli.mjs')
+    if (cleaned) {
+      console.log(green('  ✓ Cleaned successfully\n'))
+    } else {
+      console.log(dim('  ✓ No changes needed\n'))
     }
 
-    // Batch rename files
-    console.log()
-    RENAME_MAP.forEach(({ from, to }) => renameFile(from, to))
+    // Step 3: Rename files
+    console.log(`${bold('Step 3: ')}Renaming files`)
+    let renamedCount = 0
+    RENAME_MAP.forEach(({ from, to }) => {
+      if (renameFile(from, to)) {
+        renamedCount++
+      }
+    })
+    if (renamedCount > 0) {
+      console.log(green(`  ✓ Renamed ${renamedCount} file(s)\n`))
+    } else {
+      console.log(dim('  ✓ No files renamed\n'))
+    }
 
-    console.log(bold(green('\n🎉 Build completed successfully!\n')))
+    console.log(bold(green('🎉 Build completed successfully!\n')))
   } catch (error) {
     console.error(
-      `${bold(red('\n❌ Build failed: '))}${red(formatError(error))}\n`
+      `${bold(red('\n❌ Build failed: ')) + red(formatError(error))}\n`
     )
     process.exit(1)
   }
